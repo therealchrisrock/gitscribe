@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "@workspace/ui/globals.css";
+
+@theme {
+  --font-family-sans: Inter, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+@source "./app/**/*.{js,jsx,ts,tsx}";
+@source "../../packages/ui/src/**/*.{js,jsx,ts,tsx}";
+
+html,
+body {
+  @apply bg-background text-foreground;
+
+  @media (prefers-color-scheme: dark) {
+    color-scheme: dark;
+  }
+}

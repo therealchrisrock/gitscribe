@@ -1,0 +1,59 @@
+# Note: docker-compose 'version' property is obsolete in newer compose formats
+# This file is compatible with Docker Compose V2 
+# Using a specific Go image version (1.21.13) in the Dockerfile for compatibility
+
+services:
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: dockerfile
+  #   container_name: teammate-api
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     - DB_HOST=postgres
+  #     - DB_PORT=5432
+  #     - DB_USER=postgres
+  #     - DB_PASSWORD=your-super-secret-and-long-postgres-password
+  #     - DB_NAME=teammate_db
+  #     - DB_SSLMODE=disable
+  #     - GIN_MODE=debug
+  #     - APP_ENV=development
+  #     - PORT=8080
+  #     - FIREBASE_CREDENTIALS_FILE=/app/firebase-credentials/teammate-5dbc9-firebase-adminsdk-fbsvc-772ba756b7.json
+  #   volumes:
+  #     - ../server/firebase-credentials:/app/firebase-credentials
+  #     - ../.env:/app/.env
+  #   restart: unless-stopped
+  #   networks:
+  #     - teammate-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: teammate-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=your-super-secret-and-long-postgres-password
+      - POSTGRES_DB=teammate_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - teammate-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+    driver: local
+
+networks:
+  teammate-network:
+    driver: bridge
