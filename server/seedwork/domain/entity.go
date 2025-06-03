@@ -2,8 +2,6 @@ package domain
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // Entity represents the base interface for all domain entities
@@ -15,11 +13,11 @@ type Entity interface {
 }
 
 // BaseEntity provides common fields and methods for all entities
+// This is a pure domain object with no persistence concerns
 type BaseEntity struct {
-	ID        string         `json:"id" gorm:"primaryKey;type:varchar(128)"`
-	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	ID        string    `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // GetID returns the entity ID

@@ -13,9 +13,41 @@ export interface RecordingConfig {
     };
 }
 
+// Default WebSocket connection options
+export interface WebSocketOptions {
+    provider: string;
+    mode: string;
+    language: string;
+    speaker_diarization: boolean;
+    real_time?: boolean;
+    cost_optimized?: boolean;
+}
+
+export const DEFAULT_WEBSOCKET_OPTIONS: WebSocketOptions = {
+    provider: "assemblyai",
+    mode: "batch",
+    language: "en",
+    speaker_diarization: true,
+    real_time: false,
+    cost_optimized: false,
+};
+
+// Helper function to build WebSocket URL with options
+const buildWebSocketUrl = (baseUrl: string, options: WebSocketOptions): string => {
+    const params = new URLSearchParams();
+
+    Object.entries(options).forEach(([key, value]) => {
+        if (value !== undefined) {
+            params.append(key, value.toString());
+        }
+    });
+
+    return `${baseUrl}?${params.toString()}`;
+};
+
 export const DEFAULT_RECORDING_CONFIG: RecordingConfig = {
     testMode: false, // Default to production mode
-    websocketUrl: "wss://api.gitscribe.ai/ws/audio",
+    websocketUrl: buildWebSocketUrl("wss://api.gitscribe.ai/ws/audio", DEFAULT_WEBSOCKET_OPTIONS),
     timeSlice: 100, // Generate data every 100ms
     audioConstraints: {
         echoCancellation: true,
@@ -35,12 +67,15 @@ export const DEFAULT_RECORDING_CONFIG: RecordingConfig = {
 // Environment-specific configurations
 export const PRODUCTION_CONFIG: Partial<RecordingConfig> = {
     testMode: false,
-    websocketUrl: import.meta.env.VITE_WEBSOCKET_URL || "wss://api.gitscribe.ai/ws/audio",
+    websocketUrl: buildWebSocketUrl(
+        import.meta.env.VITE_WEBSOCKET_URL || "wss://api.gitscribe.ai/ws/audio",
+        DEFAULT_WEBSOCKET_OPTIONS
+    ),
 };
 
 export const DEVELOPMENT_CONFIG: Partial<RecordingConfig> = {
     testMode: false, // Turn off test mode to use websocket handler
-    websocketUrl: "ws://localhost:8080/ws/audio",
+    websocketUrl: buildWebSocketUrl("ws://localhost:8080/ws/enhanced-audio", DEFAULT_WEBSOCKET_OPTIONS),
 };
 
 export const getRecordingConfig = (): RecordingConfig => {

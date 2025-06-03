@@ -1,24 +1,50 @@
-2025/05/25 22:03:55 Connected to PostgreSQL database
-2025/05/25 22:03:55 Running migrations from path: migrations
-2025/05/25 22:03:55 No migrations to run
-2025/05/25 22:03:55 Firebase Auth initialized successfully
+2025/05/31 16:23:22 Connected to PostgreSQL database
+2025/05/31 16:23:22 Running migrations from path: migrations
+2025/05/31 16:23:22 No migrations to run
+2025/05/31 16:23:22 Firebase Auth initialized successfully
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
 [GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (5 handlers)
 [GIN-debug] GET    /health                   --> main.main.func1 (5 handlers)
-[GIN-debug] POST   /api/signup               --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).SignUpUser-fm (5 handlers)
-[GIN-debug] POST   /api/register             --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).CreateUser-fm (5 handlers)
-[GIN-debug] GET    /api/users                --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).GetUsers-fm (5 handlers)
-[GIN-debug] GET    /api/users/:id            --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).GetUserByID-fm (5 handlers)
-[GIN-debug] GET    /api/me                   --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).GetCurrentUser-fm (6 handlers)
-[GIN-debug] PUT    /api/users/:id            --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).UpdateUser-fm (6 handlers)
-[GIN-debug] DELETE /api/users/:id            --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).DeleteUser-fm (6 handlers)
-2025/05/25 22:03:55 Starting server on :8080
+[GIN-debug] POST   /signup                   --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).SignUpUser-fm (5 handlers)
+[GIN-debug] POST   /login                    --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).LoginWithToken-fm (5 handlers)
+[GIN-debug] POST   /login/email              --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).LoginWithEmailPassword-fm (5 handlers)
+[GIN-debug] POST   /login/email/direct       --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).LoginWithEmailPasswordDirect-fm (5 handlers)
+[GIN-debug] POST   /register                 --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).CreateUser-fm (5 handlers)
+[GIN-debug] POST   /refresh                  --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).RefreshToken-fm (5 handlers)
+[GIN-debug] POST   /logout                   --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).Logout-fm (5 handlers)
+[GIN-debug] POST   /forgot-password          --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).ForgotPassword-fm (5 handlers)
+[GIN-debug] POST   /reset-password           --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).ResetPassword-fm (5 handlers)
+[GIN-debug] POST   /verify-email             --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).VerifyEmail-fm (5 handlers)
+[GIN-debug] POST   /auth/exchange-token      --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).ExchangeCustomToken-fm (5 handlers)
+[GIN-debug] POST   /auth/get-id-token        --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).GetIDTokenFromCustomToken-fm (5 handlers)
+[GIN-debug] GET    /users                    --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).GetUsers-fm (5 handlers)
+[GIN-debug] GET    /users/:id                --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).GetUserByID-fm (5 handlers)
+[GIN-debug] GET    /debug/firebase           --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).DebugFirebaseConfig-fm (5 handlers)
+[GIN-debug] GET    /audio/providers          --> teammate/server/modules/transcription/interfaces/http/handlers.(*AudioHandlers).GetProviderCapabilities-fm (5 handlers)
+[GIN-debug] GET    /ws/audio                 --> teammate/server/modules/transcription/interfaces/http/handlers.(*AudioHandlers).HandleAudioWebSocket-fm (5 handlers)
+[GIN-debug] GET    /me                       --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).GetCurrentUser-fm (6 handlers)
+[GIN-debug] PUT    /users/:id                --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).UpdateUser-fm (6 handlers)
+[GIN-debug] DELETE /users/:id                --> teammate/server/modules/user/interfaces/http/handlers.(*UserHandlers).DeleteUser-fm (6 handlers)
+2025/05/31 16:23:22 Starting server on :8080
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN-debug] [ERROR] listen tcp :8080: bind: address already in use
-2025/05/25 22:03:55 Failed to start server: listen tcp :8080: bind: address already in use
-exit status 1
+[GIN] 2025-05-31T16:23:24-04:00 | GET | /health | ::1 | Status: 200 | 195.125µs | 
+2025/05/31 16:24:14 WebSocket connection established for batch mode with provider mock
+2025/05/31 16:24:14 Mock AssemblyAI session started: test-session-123 (mode: batch, diarization: true)
+2025/05/31 16:24:15 Mock AssemblyAI: Added chunk #1 to session test-session-123 (23 bytes)
+2025/05/31 16:24:16 Mock AssemblyAI: Added chunk #2 to session test-session-123 (23 bytes)
+2025/05/31 16:24:16 Mock AssemblyAI: Added chunk #3 to session test-session-123 (23 bytes)
+2025/05/31 16:24:17 Mock AssemblyAI: Added chunk #4 to session test-session-123 (23 bytes)
+2025/05/31 16:24:17 Mock AssemblyAI: Added chunk #5 to session test-session-123 (23 bytes)
+2025/05/31 16:24:24 WebSocket error: websocket: close 1000 (normal)
+2025/05/31 16:24:24 Mock AssemblyAI session aborted: test-session-123
+2025/05/31 16:24:24 WebSocket connection closed
+[GIN] 2025-05-31T16:24:24-04:00 | GET | /ws/audio | ::1 | Status: 200 | 9.511482417s | 
+SLOW REQUEST: /ws/audio took 9.511482417s
+2025/05/31 17:22:21 WebSocket connection established for realtime mode with provider assemblyai
+2025/05/31 17:22:21 WebSocket connection closed
+[GIN] 2025-05-31T17:22:21-04:00 | GET | /ws/audio | ::1 | Status: 200 | 118.833167ms | 

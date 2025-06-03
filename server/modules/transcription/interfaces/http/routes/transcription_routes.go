@@ -18,6 +18,13 @@ func NewTranscriptionRoutes(audioHandlers *handlers.AudioHandlers) *Transcriptio
 
 // SetupRoutes sets up all transcription-related routes
 func (r *TranscriptionRoutes) SetupRoutes(router *gin.RouterGroup) {
-	// WebSocket route for audio streaming
+	// Audio processing routes
+	audioGroup := router.Group("/audio")
+	{
+		// REST endpoint for provider capabilities
+		audioGroup.GET("/providers", r.audioHandlers.GetProviderCapabilities)
+	}
+
+	// WebSocket route for audio streaming (both real-time and batch)
 	router.GET("/ws/audio", r.audioHandlers.HandleAudioWebSocket)
 }

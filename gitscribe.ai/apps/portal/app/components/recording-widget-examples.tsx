@@ -35,7 +35,7 @@ export const DevelopmentRecordingWidget = () => (
         className="max-w-md mx-auto"
         config={{
             testMode: true,
-            websocketUrl: "ws://localhost:8080/ws/audio"
+            websocketUrl: "ws://localhost:8080/ws/enhanced-audio"
         }}
     />
 );

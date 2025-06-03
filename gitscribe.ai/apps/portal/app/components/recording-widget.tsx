@@ -34,14 +34,37 @@ const StopIcon = () => (
 );
 
 interface RecordingWidgetProps {
+    meetingId?: string; // Meeting ID is now required for recording
     config?: Partial<RecordingConfig>;
     className?: string;
 }
 
-export function RecordingWidget({ config = {}, className = '' }: RecordingWidgetProps) {
-    // Get environment-aware configuration
+export function RecordingWidget({ meetingId, config = {}, className = '' }: RecordingWidgetProps) {
+    // Don't render the widget if no meeting ID is provided
+    if (!meetingId) {
+        return (
+            <div className={`bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center ${className}`}>
+                <div className="text-gray-400 text-4xl mb-3">🎙️</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Audio Recording Unavailable</h3>
+                <p className="text-gray-600 mb-4">
+                    Please create a meeting first to enable audio recording functionality.
+                </p>
+                <p className="text-sm text-gray-500">
+                    The recording widget requires a valid meeting ID to establish a WebSocket connection
+                    and properly associate audio data with your meeting.
+                </p>
+            </div>
+        );
+    }
+
+    // Get environment-aware configuration with meeting ID
     const defaultConfig = getRecordingConfig();
-    const finalConfig = { ...defaultConfig, ...config };
+    const finalConfig = {
+        ...defaultConfig,
+        ...config,
+        // Ensure meeting ID is included in the WebSocket connection
+        meetingId: meetingId
+    };
 
     const { state, actions } = useAudioRecording(finalConfig);
 
@@ -89,10 +112,11 @@ export function RecordingWidget({ config = {}, className = '' }: RecordingWidget
         <AudioLevelProvider value={{ state, actions }}>
             <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>
                 <div className="flex flex-col items-center space-y-4">
-                    {/* Header */}
+                    {/* Header with Meeting Info */}
                     <div className="text-center">
                         <h3 className="text-lg font-semibold text-gray-900">Audio Recording</h3>
                         <p className="text-sm text-gray-600 mt-1">{visualization.statusMessage}</p>
+                        <p className="text-xs text-gray-500 mt-1">Meeting: {meetingId}</p>
                     </div>
 
                     {/* Recording Button with Visual Feedback */}

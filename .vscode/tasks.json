@@ -1,0 +1,66 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "start-air",
+            "type": "shell",
+            "command": "air",
+            "args": [],
+            "options": {
+                "cwd": "${workspaceFolder}/server"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "start-air-debug",
+            "type": "shell",
+            "command": "air",
+            "args": [
+                "--",
+                "--listen=:2345",
+                "--headless=true",
+                "--api-version=2",
+                "--accept-multiclient"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/server",
+                "env": {
+                    "AIR_DEBUG": "true"
+                }
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "install-air",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "install",
+                "github.com/air-verse/air@latest"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            }
+        }
+    ]
+}

@@ -24,7 +24,10 @@ export interface UseAudioRecordingReturn {
     actions: AudioRecordingActions;
 }
 
-export function useAudioRecording(config: RecordingConfig): UseAudioRecordingReturn {
+export function useAudioRecording(
+    config: RecordingConfig,
+    userInfo?: { userId: string; meetingId?: string }
+): UseAudioRecordingReturn {
     // State
     const [isRecording, setIsRecording] = useState(false);
     const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -35,13 +38,13 @@ export function useAudioRecording(config: RecordingConfig): UseAudioRecordingRet
     const [audioPlayback, setAudioPlayback] = useState<AudioPlaybackData | null>(null);
 
     // Refs
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioHandlerRef = useRef<AudioHandler | null>(null);
     const audioContextRef = useRef<AudioContext | null>(null);
     const analyserRef = useRef<AnalyserNode | null>(null);
-    const audioHandlerRef = useRef<AudioHandler | null>(null);
     const animationFrameRef = useRef<number | null>(null);
-    const isRecordingRef = useRef<boolean>(false); // Track recording state in ref
+    const isRecordingRef = useRef(false); // Track recording state without causing re-renders
 
     // Audio level analysis
     const analyzeAudioLevel = useCallback(() => {
@@ -161,7 +164,7 @@ export function useAudioRecording(config: RecordingConfig): UseAudioRecordingRet
             setupAudioAnalysis(stream);
 
             // Initialize audio handler
-            audioHandlerRef.current = createAudioHandler(config.testMode, config.websocketUrl);
+            audioHandlerRef.current = createAudioHandler(config.testMode, config.websocketUrl, userInfo);
             await audioHandlerRef.current.initialize();
             setIsConnected(audioHandlerRef.current.isConnected());
 
@@ -253,7 +256,8 @@ export function useAudioRecording(config: RecordingConfig): UseAudioRecordingRet
         config.websocketUrl,
         config.timeSlice,
         setupAudioAnalysis,
-        getSupportedMimeType
+        getSupportedMimeType,
+        userInfo
     ]);
 
     // Stop recording

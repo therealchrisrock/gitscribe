@@ -1,0 +1,82 @@
+---
+description: 
+globs: server/**/*.go
+alwaysApply: false
+---
+# Gitscribe Server Development Guidelines
+
+## 1. Server Root Organization
+
+The `/server` directory organizes shared components, module containers, and operational files. Adhere to this structure for consistency and clarity.
+
+```text
+server/
+├── main.go               # Main application entry point & DI container setup
+├── go.mod                # Go module definition and dependencies
+├── modules/              # Root for all business domain modules (bounded contexts)
+│   └── {domain_module}/  # e.g., meeting/, user/, transcription/
+│       ├── application/  # Module-specific application layer (see Rule 2)
+│       ├── domain/       # Module-specific domain layer (see Rule 2)
+│       ├── infrastructure/ # Module-specific infrastructure layer (see Rule 2)
+│       └── interfaces/     # Module-specific interface layer (see Rule 2)
+├── seedwork/             # Shared DDD building blocks and cross-cutting concerns
+│   ├── application/      # Shared application utilities (e.g., middleware)
+│   ├── domain/           # Shared domain primitives (e.g., BaseEntity)
+│   └── infrastructure/   # Shared infrastructure (e.g., DB connection, config)
+├── migrations/           # Database schema migrations (e.g., using GORM migrate)
+├── test/                 # Integration or End-to-End tests spanning multiple modules
+├── docs/                 # Server-specific technical documentation
+├── firebase-credentials/ # Firebase service account keys (environment-specific)
+├── .env                  # Environment variables for local development
+├── .air.toml             # Configuration for live reloading (Air)
+├── docker-compose.yml    # Docker service definitions for development/testing
+└── Dockerfile            # Docker image build instructions for the server
+```
+
+**Key Directory Purposes:**
+-   **`main.go`**: Initializes the application, sets up dependency injection, registers routes, and starts the server.
+-   **`modules/`**: Contains distinct business domains. Each subdirectory is a self-contained module following the layered architecture detailed in Rule 2.
+-   **`seedwork/`**: Provides reusable, foundational code (e.g., `BaseEntity`, `BaseRepositoryModel`, `DomainMapper`, shared middleware, database connection logic) used across multiple modules. This helps avoid code duplication and promotes consistency.
+-   **`migrations/`**: Stores database migration files, ensuring schema changes are version-controlled and repeatable.
+-   **`test/`**: Houses tests that span multiple modules or require a more integrated environment (e.g., end-to-end tests). Module-specific unit/integration tests reside within their respective module's directories.
+-   **Configuration & Operations**: Files like `.env`, `.air.toml`, `docker-compose.yml`, `Dockerfile` manage the server's runtime environment, build process, and development workflow.
+
+## 2. Module & DDD Layered Architecture
+
+When working on server-side Go code, particularly within a specific module (e.g., `/server/modules/{domain_module}/`), follow DDD layered architecture:
+
+**Module-Based Organization (Recap from Rule 1):**
+-   Each business domain is a separate module under `/server/modules/{domain}/`.
+-   Modules are self-contained with clear boundaries (bounded contexts).
+-   Shared abstractions live in `/server/seedwork/`.
+-   Each module follows an identical internal layer structure for consistency.
+
+**Layer Structure (within each module):**
+-   **Domain Layer** (`/domain/entities/`): Pure business logic, value objects, aggregates. No external dependencies (especially no GORM tags or infrastructure concerns).
+-   **Application Layer** (`/application/`): Thin orchestration services, use case implementation, commands/queries as DTOs. Mediates between interface and domain layers.
+-   **Infrastructure Layer** (`/infrastructure/`): Repository implementations (with GORM tags), external service integrations (clients for APIs, message brokers), concrete persistence logic.
+-   **Interface Layer** (`/interfaces/http/`): HTTP handlers, routes, request/response DTOs, API contracts. Adapts external requests to application layer commands/queries.
+
+**Key Patterns & Best Practices:**
+-   **Domain Entities**: Embed `seedwork.domain.BaseEntity`. Business methods should use simple parameters, not complex command objects. Keep domain logic pure.
+-   **Repository Models**: These are persistence-specific structs. Embed `seedwork.domain.BaseRepositoryModel`. GORM tags belong here, NOT in domain entities.
+-   **Application Services**: Act as orchestrators. They should not contain business logic but delegate to domain entities/services and use repositories for persistence.
+-   **Data Mappers**: Use mappers (e.g., `seedwork.domain.DomainMapper[D Entity, R RepositoryModel]`) for clean, type-safe conversion between domain entities and repository models.
+-   **Module Structure**: Ensure your module's internal directories match `/application/`, `/domain/`, `/infrastructure/`, `/interfaces/`.
+-   **Dependency Rule**: Dependencies flow inwards: Interface -> Application -> Domain. The Domain layer should not depend on Application or Infrastructure. Infrastructure implements interfaces defined in the Domain or Application layers.
+
+**Module Dependencies:**
+-   Modules should generally **not** directly depend on other modules' internal components.
+-   Cross-module communication should ideally occur through:
+    1.  Application services of the other module (if synchronous coupling is acceptable).
+    2.  Domain events (for asynchronous, decoupled communication).
+-   Shared domain concepts that are truly universal belong in `seedwork/domain/`, not duplicated in individual modules.
+
+**Anti-Patterns to Strictly Avoid:**
+-   Placing GORM tags or any persistence-specific annotations in domain entities.
+-   Implementing business logic within application services, HTTP handlers, or repository implementations.
+-   Using complex command objects as parameters for domain entity methods.
+-   Directly accessing `infrastructure` components (like GORM) from the `domain` layer.
+-   Creating direct, strong dependencies between the internal components of different modules.
+-   Shared mutable state between modules.
+-   Exposing GORM models or other infrastructure details through application service interfaces.

@@ -1,6 +1,9 @@
 package entities
 
 import (
+	"errors"
+	"net/url"
+	"strings"
 	"teammate/server/seedwork/domain"
 	"time"
 )
@@ -38,9 +41,20 @@ type Meeting struct {
 	Participants  []Participant `json:"participants" gorm:"foreignKey:MeetingID"`
 }
 
-// NewMeeting creates a new Meeting entity
-func NewMeeting(userID, title string, meetingType MeetingType, meetingURL string) Meeting {
-	meeting := Meeting{
+// CreateMeeting creates a new Meeting entity with business validation
+func CreateMeeting(userID, title string, meetingType MeetingType, meetingURL string) (*Meeting, error) {
+	// Business validation
+	if userID == "" {
+		return nil, errors.New("user ID is required")
+	}
+	if title == "" {
+		return nil, errors.New("meeting title is required")
+	}
+	if err := validateMeetingURL(meetingURL); err != nil {
+		return nil, err
+	}
+
+	meeting := &Meeting{
 		UserID:     userID,
 		Title:      title,
 		Type:       meetingType,
@@ -49,21 +63,37 @@ func NewMeeting(userID, title string, meetingType MeetingType, meetingURL string
 		MeetingURL: meetingURL,
 	}
 	meeting.SetID(domain.GenerateID())
-	return meeting
+	return meeting, nil
 }
 
-// StartMeeting transitions the meeting to in-progress status
-func (m *Meeting) StartMeeting(botJoinURL string) {
+// Start transitions the meeting to in-progress status
+func (m *Meeting) Start(botJoinURL string) error {
+	if m.Status != Scheduled {
+		return errors.New("meeting can only be started from scheduled status")
+	}
+	if err := validateMeetingURL(botJoinURL); err != nil {
+		return errors.New("invalid bot join URL: " + err.Error())
+	}
+
 	m.Status = InProgress
 	m.BotJoinURL = botJoinURL
+	return nil
 }
 
-// CompleteMeeting transitions the meeting to completed status
-func (m *Meeting) CompleteMeeting(recordingPath string) {
+// Complete transitions the meeting to completed status
+func (m *Meeting) Complete(recordingPath string) error {
+	if m.Status != InProgress {
+		return errors.New("meeting can only be completed from in-progress status")
+	}
+	if recordingPath == "" {
+		return errors.New("recording path is required to complete meeting")
+	}
+
 	m.Status = Completed
 	m.RecordingPath = recordingPath
 	now := time.Now()
 	m.EndTime = &now
+	return nil
 }
 
 // FailMeeting transitions the meeting to failed status
@@ -101,6 +131,29 @@ func (m *Meeting) GetDuration() *time.Duration {
 func (m *Meeting) AddParticipant(name, email, role string) {
 	participant := NewParticipant(m.GetID(), name, email, role)
 	m.Participants = append(m.Participants, participant)
+}
+
+// validateMeetingURL validates that a URL is properly formatted
+func validateMeetingURL(meetingURL string) error {
+	if meetingURL == "" {
+		return errors.New("meeting URL is required")
+	}
+
+	// Basic URL format validation
+	parsedURL, err := url.Parse(meetingURL)
+	if err != nil {
+		return errors.New("invalid URL format")
+	}
+
+	if parsedURL.Scheme == "" || parsedURL.Host == "" {
+		return errors.New("URL must include scheme and host")
+	}
+
+	if !strings.HasPrefix(parsedURL.Scheme, "http") {
+		return errors.New("URL must use HTTP or HTTPS scheme")
+	}
+
+	return nil
 }
 
 // TableName sets the table name for GORM
