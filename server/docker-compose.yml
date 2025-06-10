@@ -31,7 +31,7 @@ services:
   #     - teammate-network
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17
     container_name: teammate-postgres
     ports:
       - "5432:5432"
