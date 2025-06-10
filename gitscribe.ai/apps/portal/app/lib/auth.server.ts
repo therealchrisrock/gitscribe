@@ -9,30 +9,33 @@ if (!getApps().length) {
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const rawPrivateKeyFromEnv = process.env.FIREBASE_PRIVATE_KEY;
 
-    let processedPrivateKey;
-    if (rawPrivateKeyFromEnv) {
-        processedPrivateKey = rawPrivateKeyFromEnv
-            .replace(/^["\']|["\']$/g, '') // Remove surrounding single or double quotes
-            .replace(/\\n/g, '\n');      // Convert literal \n to actual newlines
+    if (!projectId || !clientEmail || !rawPrivateKeyFromEnv) {
+        throw new Error('Missing required Firebase Admin SDK environment variables');
     }
 
-    console.log('Firebase Admin SDK Config:', {
-        projectId: projectId ? 'SET' : 'MISSING',
-        clientEmail: clientEmail ? 'SET' : 'MISSING',
-        privateKey: processedPrivateKey ? 'SET (processed)' : 'MISSING'
-    });
+    // Process the private key - ensure it's properly formatted
+    let privateKey = rawPrivateKeyFromEnv
+        .replace(/^["\']|["\']$/g, '') // Remove surrounding quotes
+        .replace(/\\n/g, '\n')        // Convert literal \n to actual newlines
+        .replace(/\\\\/g, '\\');      // Handle any double-escaped backslashes
 
-    if (!projectId || !clientEmail || !processedPrivateKey) {
-        throw new Error('Missing or invalid Firebase Admin SDK environment variables');
+    // Ensure proper PEM format
+    if (!privateKey.includes('-----END PRIVATE KEY-----')) {
+        privateKey = privateKey + '\n-----END PRIVATE KEY-----';
     }
 
-    initializeApp({
-        credential: cert({
-            projectId,
-            clientEmail,
-            privateKey: processedPrivateKey,
-        }),
-    });
+    try {
+        initializeApp({
+            credential: cert({
+                projectId,
+                clientEmail,
+                privateKey
+            }),
+        });
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        throw error;
+    }
 }
 
 const auth = getAuth();
