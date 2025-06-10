@@ -156,9 +156,9 @@ export function CreateMeetingButton({ className = '', onMeetingCreated }: Create
                                         name="meeting_url"
                                         value={formData.meeting_url}
                                         onChange={handleInputChange}
-                                        required
+                                        required={formData.type !== 'generic'}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="https://zoom.us/j/123456789"
+                                        placeholder={formData.type === 'generic' ? 'Optional' : 'https://zoom.us/j/123456789'}
                                     />
                                 </div>
 
