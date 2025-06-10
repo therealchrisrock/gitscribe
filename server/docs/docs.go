@@ -24,6 +24,27 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/audio/providers": {
+            "get": {
+                "description": "Get the capabilities and pricing of available transcription providers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "audio"
+                ],
+                "summary": "Get provider capabilities",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/auth/exchange-token": {
             "post": {
                 "description": "Provides instructions on how to exchange a custom token for an ID token",
@@ -830,6 +851,152 @@ const docTemplate = `{
                 }
             }
         },
+        "/meetings": {
+            "get": {
+                "description": "Get all meetings for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meetings"
+                ],
+                "summary": "Get user meetings",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit number of results",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset for pagination",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.MeetingsListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new meeting for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meetings"
+                ],
+                "summary": "Create a new meeting",
+                "parameters": [
+                    {
+                        "description": "Meeting information",
+                        "name": "meeting",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateMeetingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.MeetingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/meetings/{id}": {
+            "get": {
+                "description": "Get a meeting by its ID for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meetings"
+                ],
+                "summary": "Get a meeting by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Meeting ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.MeetingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "description": "Register a new user in the system (for existing Firebase users)",
@@ -1187,9 +1354,74 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/ws/audio": {
+            "get": {
+                "description": "Handle websocket connections for real-time or batch audio processing",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "audio"
+                ],
+                "summary": "Handle audio websocket connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "realtime",
+                        "description": "Processing mode (realtime or batch)",
+                        "name": "mode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "assemblyai",
+                        "description": "Transcription provider",
+                        "name": "provider",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "en",
+                        "description": "Language code",
+                        "name": "language",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "Switching Protocols",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "dtos.CreateMeetingRequest": {
+            "type": "object",
+            "required": [
+                "meeting_url",
+                "title",
+                "type"
+            ],
+            "properties": {
+                "meeting_url": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/entities.MeetingType"
+                }
+            }
+        },
         "dtos.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -1206,6 +1438,61 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "dtos.MeetingResponse": {
+            "type": "object",
+            "properties": {
+                "bot_join_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "meeting_url": {
+                    "type": "string"
+                },
+                "recording_path": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/entities.MeetingStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/entities.MeetingType"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.MeetingsListResponse": {
+            "type": "object",
+            "properties": {
+                "meetings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.MeetingResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -1253,6 +1540,36 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "entities.MeetingStatus": {
+            "type": "string",
+            "enum": [
+                "scheduled",
+                "in_progress",
+                "completed",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "Scheduled",
+                "InProgress",
+                "Completed",
+                "Failed"
+            ]
+        },
+        "entities.MeetingType": {
+            "type": "string",
+            "enum": [
+                "zoom",
+                "google_meet",
+                "microsoft_teams",
+                "generic"
+            ],
+            "x-enum-varnames": [
+                "ZoomMeeting",
+                "GoogleMeet",
+                "MicrosoftTeams",
+                "GenericMeeting"
+            ]
         }
     },
     "securityDefinitions": {

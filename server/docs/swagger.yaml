@@ -1,5 +1,18 @@
 basePath: /
 definitions:
+  dtos.CreateMeetingRequest:
+    properties:
+      meeting_url:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/entities.MeetingType'
+    required:
+    - meeting_url
+    - title
+    - type
+    type: object
   dtos.CreateUserRequest:
     properties:
       email:
@@ -12,6 +25,42 @@ definitions:
     - email
     - id
     - name
+    type: object
+  dtos.MeetingResponse:
+    properties:
+      bot_join_url:
+        type: string
+      created_at:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: string
+      meeting_url:
+        type: string
+      recording_path:
+        type: string
+      start_time:
+        type: string
+      status:
+        $ref: '#/definitions/entities.MeetingStatus'
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/entities.MeetingType'
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  dtos.MeetingsListResponse:
+    properties:
+      meetings:
+        items:
+          $ref: '#/definitions/dtos.MeetingResponse'
+        type: array
+      total:
+        type: integer
     type: object
   dtos.UpdateUserRequest:
     properties:
@@ -42,6 +91,30 @@ definitions:
           $ref: '#/definitions/dtos.UserResponse'
         type: array
     type: object
+  entities.MeetingStatus:
+    enum:
+    - scheduled
+    - in_progress
+    - completed
+    - failed
+    type: string
+    x-enum-varnames:
+    - Scheduled
+    - InProgress
+    - Completed
+    - Failed
+  entities.MeetingType:
+    enum:
+    - zoom
+    - google_meet
+    - microsoft_teams
+    - generic
+    type: string
+    x-enum-varnames:
+    - ZoomMeeting
+    - GoogleMeet
+    - MicrosoftTeams
+    - GenericMeeting
 host: localhost:8080
 info:
   contact:
@@ -56,6 +129,20 @@ info:
   title: Teammate API
   version: "1.0"
 paths:
+  /audio/providers:
+    get:
+      description: Get the capabilities and pricing of available transcription providers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get provider capabilities
+      tags:
+      - audio
   /auth/exchange-token:
     post:
       consumes:
@@ -583,6 +670,102 @@ paths:
       summary: Get current user
       tags:
       - users
+  /meetings:
+    get:
+      consumes:
+      - application/json
+      description: Get all meetings for the authenticated user
+      parameters:
+      - description: Limit number of results
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.MeetingsListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user meetings
+      tags:
+      - meetings
+    post:
+      consumes:
+      - application/json
+      description: Create a new meeting for the authenticated user
+      parameters:
+      - description: Meeting information
+        in: body
+        name: meeting
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.CreateMeetingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dtos.MeetingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new meeting
+      tags:
+      - meetings
+  /meetings/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get a meeting by its ID for the authenticated user
+      parameters:
+      - description: Meeting ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.MeetingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a meeting by ID
+      tags:
+      - meetings
   /register:
     post:
       consumes:
@@ -818,6 +1001,37 @@ paths:
       summary: Update a user
       tags:
       - users
+  /ws/audio:
+    get:
+      consumes:
+      - application/json
+      description: Handle websocket connections for real-time or batch audio processing
+      parameters:
+      - default: realtime
+        description: Processing mode (realtime or batch)
+        in: query
+        name: mode
+        type: string
+      - default: assemblyai
+        description: Transcription provider
+        in: query
+        name: provider
+        type: string
+      - default: en
+        description: Language code
+        in: query
+        name: language
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Switching Protocols
+          schema:
+            type: string
+      summary: Handle audio websocket connection
+      tags:
+      - audio
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and the Firebase ID token.
