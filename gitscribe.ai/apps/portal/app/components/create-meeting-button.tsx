@@ -85,7 +85,7 @@ export function CreateMeetingButton({ className = '', onMeetingCreated }: Create
         // Ensure the "type" field maintains its union type.
         const key = name as keyof CreateMeetingRequest;
 
-        setFormData(prev => ({
+        setFormData((prev: CreateMeetingRequest) => ({
             ...prev,
             [key]: value,
         } as CreateMeetingRequest));
