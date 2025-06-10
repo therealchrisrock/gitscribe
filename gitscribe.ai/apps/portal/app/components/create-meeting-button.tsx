@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, type ChangeEvent, type FormEvent } from 'react';
+import type { FetcherWithComponents } from '@remix-run/react';
 import { useFetcher } from '@remix-run/react';
 
 interface CreateMeetingButtonProps {
@@ -28,16 +29,19 @@ interface CreateMeetingRequest {
 }
 
 export function CreateMeetingButton({ className = '', onMeetingCreated }: CreateMeetingButtonProps) {
-    const [isOpen, setIsOpen] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _fetcher: FetcherWithComponents<any> = useFetcher();
+
+    const [isOpen, setIsOpen] = useState<boolean>(false);
     const [formData, setFormData] = useState<CreateMeetingRequest>({
         title: '',
         type: 'zoom',
         meeting_url: ''
     });
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
         setError(null);
@@ -73,9 +77,18 @@ export function CreateMeetingButton({ className = '', onMeetingCreated }: Create
         }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleInputChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Ensure the "type" field maintains its union type.
+        const key = name as keyof CreateMeetingRequest;
+
+        setFormData(prev => ({
+            ...prev,
+            [key]: value,
+        } as CreateMeetingRequest));
     };
 
     return (
